@@ -81,36 +81,12 @@ const WORK_SAMPLES: WorkSample[] = [
   }
 ];
 
-const CDN_FALLBACK_URLS: Record<string, string> = {
-  "showreel": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-  "design-1": "https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/store-aisle-detection.mp4",
-  "design-2": "https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/one-by-one-person-detection.mp4",
-  "design-3": "https://raw.githubusercontent.com/intel-iot-devkit/sample-videos/master/bottle-detection.mp4",
-  "design-4": "https://www.w3schools.com/html/mov_bbb.mp4",
-};
 
 export default function VideoGallery() {
   const [selectedSample, setSelectedSample] = useState<WorkSample | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [hoveredVideoId, setHoveredVideoId] = useState<string | null>(null);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
-
-  const [videoSources, setVideoSources] = useState<Record<string, string>>(() => {
-    return WORK_SAMPLES.reduce((acc, sample) => {
-      acc[sample.id] = sample.videoUrl;
-      return acc;
-    }, {} as Record<string, string>);
-  });
-
-  const handleVideoError = (id: string) => {
-    const fallbackUrl = CDN_FALLBACK_URLS[id];
-    if (fallbackUrl && videoSources[id] !== fallbackUrl) {
-      setVideoSources((prev) => ({
-        ...prev,
-        [id]: fallbackUrl,
-      }));
-    }
-  };
 
   const categories = ["All", ...Array.from(new Set(WORK_SAMPLES.map((s) => s.category)))];
 
@@ -151,10 +127,6 @@ export default function VideoGallery() {
           <div className="flex flex-wrap items-center gap-2 text-indigo-400 text-xs font-semibold tracking-[0.2em] uppercase mb-3">
             <Film className="w-3.5 h-3.5" />
             SAMPLE OF OUR WORK
-            <span className="ml-0 sm:ml-2 text-[9px] px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full normal-case font-normal tracking-normal flex items-center gap-1 select-none">
-              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-              Hybrid Auto-Healing Stream Active
-            </span>
           </div>
           <h2 className="text-3xl md:text-4xl font-serif text-slate-100 font-extrabold tracking-tight">
             Engineered to Convert
@@ -216,12 +188,11 @@ export default function VideoGallery() {
                   ref={(el) => {
                     videoRefs.current[sample.id] = el;
                   }}
-                  src={videoSources[sample.id]}
+                  src={sample.videoUrl}
                   loop
                   muted
                   playsInline
                   preload="metadata"
-                  onError={() => handleVideoError(sample.id)}
                   className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
                 />
 
@@ -335,14 +306,10 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [videoError, setVideoError] = useState<string | null>(null);
-  const [videoUrl, setVideoUrl] = useState(sample.videoUrl);
-  const [isUsingFallback, setIsUsingFallback] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   // Reset states on sample change
   useEffect(() => {
-    setVideoUrl(sample.videoUrl);
-    setIsUsingFallback(false);
     setIsLoading(true);
     setVideoError(null);
   }, [sample]);
@@ -384,7 +351,7 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
     return () => {
       active = false;
     };
-  }, [videoUrl]);
+  }, [sample.videoUrl]);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -470,9 +437,9 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
         <div className="relative bg-black flex flex-col items-center justify-center md:col-span-8 group/player h-[50vh] md:h-full min-h-0 select-none">
           <div className="absolute inset-0 w-full h-full flex items-center justify-center p-2 bg-black/60">
             <video
-              key={videoUrl}
+              key={sample.videoUrl}
               ref={videoRef}
-              src={videoUrl}
+              src={sample.videoUrl}
               loop
               playsInline
               muted={isMuted}
@@ -482,17 +449,9 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
               onWaiting={() => setIsLoading(true)}
               onPlaying={() => setIsLoading(false)}
               onError={(e) => {
-                const fallbackUrl = CDN_FALLBACK_URLS[sample.id];
-                if (fallbackUrl && !isUsingFallback) {
-                  setIsUsingFallback(true);
-                  setVideoUrl(fallbackUrl);
-                  setIsLoading(true);
-                  setVideoError(null);
-                } else {
-                  setIsLoading(false);
-                  const err = (e.target as HTMLVideoElement).error;
-                  setVideoError(err ? `Error ${err.code}: ${err.message || "The file could not be loaded or decoded."}` : "The video file failed to load.");
-                }
+                setIsLoading(false);
+                const err = (e.target as HTMLVideoElement).error;
+                setVideoError(err ? `Error ${err.code}: ${err.message || "The file could not be loaded or decoded."}` : "The video file failed to load.");
               }}
               onClick={togglePlay}
               className="max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
