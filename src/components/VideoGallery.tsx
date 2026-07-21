@@ -303,7 +303,15 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [videoError, setVideoError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  // Reset states on sample change
+  useEffect(() => {
+    setIsLoading(true);
+    setVideoError(null);
+  }, [sample]);
 
   // Playback initialization with unmuted-to-muted fallback state machine
   useEffect(() => {
@@ -314,6 +322,7 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
         .then(() => {
           if (active) {
             setIsPlaying(true);
+            setIsLoading(false);
           }
         })
         .catch(() => {
@@ -325,11 +334,13 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
               .then(() => {
                 if (active) {
                   setIsPlaying(true);
+                  setIsLoading(false);
                 }
               })
               .catch(() => {
                 if (active) {
                   setIsPlaying(false);
+                  setIsLoading(false);
                 }
               });
           }
@@ -425,6 +436,7 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
         <div className="relative bg-black flex flex-col items-center justify-center md:col-span-8 group/player h-[50vh] md:h-full min-h-0 select-none">
           <div className="absolute inset-0 w-full h-full flex items-center justify-center p-2 bg-black/60">
             <video
+              key={sample.videoUrl}
               ref={videoRef}
               src={sample.videoUrl}
               loop
@@ -432,10 +444,44 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
               muted={isMuted}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleLoadedMetadata}
+              onCanPlay={() => setIsLoading(false)}
+              onWaiting={() => setIsLoading(true)}
+              onPlaying={() => setIsLoading(false)}
+              onError={(e) => {
+                setIsLoading(false);
+                const err = (e.target as HTMLVideoElement).error;
+                setVideoError(err ? `Error ${err.code}: ${err.message || "The file could not be loaded or decoded."}` : "The video file failed to load.");
+              }}
               onClick={togglePlay}
               className="max-w-full max-h-full w-auto h-auto object-contain cursor-pointer"
             />
           </div>
+
+          {/* Loading spinner */}
+          {isLoading && !videoError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 z-10 pointer-events-none">
+              <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+
+          {/* Interactive diagnostics fallback in case of errors */}
+          {videoError && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-slate-950/90 z-20">
+              <div className="w-12 h-12 rounded-full bg-rose-500/15 flex items-center justify-center text-rose-400 mb-3">
+                <VolumeX className="w-6 h-6" />
+              </div>
+              <p className="text-slate-200 font-bold text-sm mb-1">Unable to Stream Video</p>
+              <p className="text-slate-400 text-xs max-w-sm leading-relaxed mb-4">{videoError}</p>
+              <div className="text-[10px] text-slate-400 bg-slate-900 border border-slate-800/80 rounded-md p-3 max-w-md">
+                <p className="font-semibold text-slate-300 mb-1">Common Troubleshooting Steps:</p>
+                <ul className="list-disc list-inside space-y-1 text-left text-slate-400">
+                  <li>Verify the file <code className="text-indigo-400">public{sample.videoUrl}</code> was pushed to your GitHub.</li>
+                  <li>Check if the file is tracked via Git LFS pointers (which Vercel might not download).</li>
+                  <li>Ensure your Vercel project has synced fully with the latest commit.</li>
+                </ul>
+              </div>
+            </div>
+          )}
 
           {/* Player controls bar */}
           <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black via-black/85 to-transparent flex flex-col gap-3 opacity-100 md:opacity-0 md:group-hover/player:opacity-100 transition-opacity duration-300 z-10">
