@@ -12,7 +12,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "showreel",
     title: "Nexora Creative Ad Showreel",
-    videoUrl: "./whatsapp_video.mp4",
+    videoUrl: "/whatsapp_video.mp4",
     description: "An immersive, fast-paced showcase of our top-performing UGC creatives and high-fidelity motion graphic ads crafted to capture attention and scale customer acquisition.",
     tags: ["Core Showreel", "UGC Creative", "Motion Graphics", "CTR Optimization"],
     category: "Featured Showcase",
@@ -26,7 +26,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "design-1",
     title: "UGC Direct Response Ad",
-    videoUrl: "./design_1.mp4",
+    videoUrl: "/design_1.mp4",
     description: "High-converting authentic user-generated content for TikTok and Instagram, featuring high-retention hooks, relatable creator storytelling, and clear calls-to-action.",
     tags: ["TikTok Ad", "User Generated Content", "Hook Strategy", "Direct Response"],
     category: "UGC Ad Campaigns",
@@ -40,7 +40,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "design-2",
     title: "SaaS Motion Graphics Product Video",
-    videoUrl: "./design_2.mp4",
+    videoUrl: "/design_2.mp4",
     description: "A premium motion graphics ad featuring seamless animated transitions, sleek interface mockups, and dynamic kinetic typography explaining key product features.",
     tags: ["Motion Graphics", "Product Demo", "Kinetic Typography", "2D/3D Animation"],
     category: "Motion Graphic Ads",
@@ -54,7 +54,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "design-3",
     title: "E-Commerce Creator Hook Ad",
-    videoUrl: "./design_3.mp4",
+    videoUrl: "/design_3.mp4",
     description: "Social-first creator video focusing on problem-solving presentation, micro-narratives, and native native-style typography optimized for high click-through rates.",
     tags: ["UGC Hook", "E-Commerce", "Native Format", "Conversion Boost"],
     category: "Direct Response & Hooks",
@@ -68,7 +68,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "design-4",
     title: "Sleek Animated Typography Promo",
-    videoUrl: "./design_4.mp4",
+    videoUrl: "/design_4.mp4",
     description: "High-energy, fast-paced motion graphics promo utilizing bold visual rhythms, kinetic layout animation, and sound-synchronized visual transitions.",
     tags: ["Kinetic Typography", "Brand Promo", "Social Ad", "Attention Grabber"],
     category: "Motion Graphic Ads",
