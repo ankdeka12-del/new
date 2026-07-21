@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@theme {
+  /* Calacatta Viola Marble - Warm luxurious off-white marble with dramatic deep burgundy and violet-plum veining */
+  --color-slate-50: #1a0104; /* Obsidian burgundy */
+  --color-slate-100: #3d050b; /* Rich deep Burgundy Patina - primary text */
+  --color-slate-200: #540d15; /* Deep wine text */
+  --color-slate-300: #701b24; /* Warm patina burgundy */
+  --color-slate-400: #91323e; /* Patina rose text */
+  --color-slate-500: #ad4e5b; /* Soft berry rose */
+  --color-slate-600: #c7707c; /* Pale plum grey */
+  --color-slate-700: #e09aa4; /* Rose cream highlight */
+  --color-slate-800: #ecdcd5; /* Luxury card borders & highlights */
+  --color-slate-900: #faf3ed; /* Calacatta Viola Base Card Background - warm marble cream */
+  --color-slate-950: #fdfbf9; /* Calacatta Viola Main Background - luxurious off-white marble stone */
+
+  /* Burgundy Patina Highlight Theme */
+  --color-indigo-50: #fff7f8;
+  --color-indigo-100: #fce1e4;
+  --color-indigo-200: #f7bec5;
+  --color-indigo-300: #eb8c99;
+  --color-indigo-400: #d65566;
+  --color-indigo-500: #b21b2f; /* Active Burgundy Patina Accent */
+  --color-indigo-600: #941021;
+  --color-indigo-700: #780716;
+  --color-indigo-800: #5c010b;
+  --color-indigo-900: #3f0005;
+  --color-indigo-950: #260002;
+}
