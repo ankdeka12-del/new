@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Play, Pause, Maximize2, Volume2, VolumeX, Eye, Sparkles, Film, ArrowUpRight } from "lucide-react";
 import { WorkSample } from "../types";
@@ -12,7 +12,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "showreel",
     title: "Nexora Creative Ad Showreel",
-    videoUrl: "/whatsapp_video.mp4",
+    videoUrl: "./whatsapp_video.mp4",
     description: "An immersive, fast-paced showcase of our top-performing UGC creatives and high-fidelity motion graphic ads crafted to capture attention and scale customer acquisition.",
     tags: ["Core Showreel", "UGC Creative", "Motion Graphics", "CTR Optimization"],
     category: "Featured Showcase",
@@ -26,7 +26,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "design-1",
     title: "UGC Direct Response Ad",
-    videoUrl: "/design_1.mp4",
+    videoUrl: "./design_1.mp4",
     description: "High-converting authentic user-generated content for TikTok and Instagram, featuring high-retention hooks, relatable creator storytelling, and clear calls-to-action.",
     tags: ["TikTok Ad", "User Generated Content", "Hook Strategy", "Direct Response"],
     category: "UGC Ad Campaigns",
@@ -40,7 +40,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "design-2",
     title: "SaaS Motion Graphics Product Video",
-    videoUrl: "/design_2.mp4",
+    videoUrl: "./design_2.mp4",
     description: "A premium motion graphics ad featuring seamless animated transitions, sleek interface mockups, and dynamic kinetic typography explaining key product features.",
     tags: ["Motion Graphics", "Product Demo", "Kinetic Typography", "2D/3D Animation"],
     category: "Motion Graphic Ads",
@@ -54,7 +54,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "design-3",
     title: "E-Commerce Creator Hook Ad",
-    videoUrl: "/design_3.mp4",
+    videoUrl: "./design_3.mp4",
     description: "Social-first creator video focusing on problem-solving presentation, micro-narratives, and native native-style typography optimized for high click-through rates.",
     tags: ["UGC Hook", "E-Commerce", "Native Format", "Conversion Boost"],
     category: "Direct Response & Hooks",
@@ -68,7 +68,7 @@ const WORK_SAMPLES: WorkSample[] = [
   {
     id: "design-4",
     title: "Sleek Animated Typography Promo",
-    videoUrl: "/design_4.mp4",
+    videoUrl: "./design_4.mp4",
     description: "High-energy, fast-paced motion graphics promo utilizing bold visual rhythms, kinetic layout animation, and sound-synchronized visual transitions.",
     tags: ["Kinetic Typography", "Brand Promo", "Social Ad", "Attention Grabber"],
     category: "Motion Graphic Ads",
@@ -299,27 +299,78 @@ interface TheaterModalProps {
 }
 
 function TheaterModal({ sample, onClose }: TheaterModalProps) {
-  const [isPlaying, setIsPlaying] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  // Playback initialization with unmuted-to-muted fallback state machine
+  useEffect(() => {
+    let active = true;
+    if (videoRef.current) {
+      // First attempt unmuted playback (which may succeed since user just clicked Case Study)
+      videoRef.current.play()
+        .then(() => {
+          if (active) {
+            setIsPlaying(true);
+          }
+        })
+        .catch(() => {
+          // If browser blocked unmuted autoplay, retry as muted
+          if (active && videoRef.current) {
+            videoRef.current.muted = true;
+            setIsMuted(true);
+            videoRef.current.play()
+              .then(() => {
+                if (active) {
+                  setIsPlaying(true);
+                }
+              })
+              .catch(() => {
+                if (active) {
+                  setIsPlaying(false);
+                }
+              });
+          }
+        });
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [sample]);
+
   const togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
+        setIsPlaying(false);
       } else {
-        videoRef.current.play().catch(() => {});
+        videoRef.current.play()
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch(() => {
+            // Muted play fallback on manual press if needed
+            if (videoRef.current) {
+              videoRef.current.muted = true;
+              setIsMuted(true);
+              videoRef.current.play()
+                .then(() => {
+                  setIsPlaying(true);
+                });
+            }
+          });
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
   const toggleMute = () => {
     if (videoRef.current) {
-      videoRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
+      const nextMute = !isMuted;
+      videoRef.current.muted = nextMute;
+      setIsMuted(nextMute);
     }
   };
 
@@ -367,7 +418,7 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
       className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4 md:p-6 backdrop-blur-md"
     >
       <div 
-        id="theater-modal-container"
+         id="theater-modal-container"
         className="w-full max-w-5xl bg-slate-950 border border-slate-900 rounded-2xl overflow-hidden shadow-2xl flex flex-col md:grid md:grid-cols-12 h-[90vh] md:h-[80vh] max-h-[750px]"
       >
         {/* Video Cinema View (8 cols) */}
@@ -376,7 +427,6 @@ function TheaterModal({ sample, onClose }: TheaterModalProps) {
             <video
               ref={videoRef}
               src={sample.videoUrl}
-              autoPlay
               loop
               playsInline
               muted={isMuted}
